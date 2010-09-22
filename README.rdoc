@@ -1,0 +1,56 @@
+﻿= nServer
+nServer is a simple, event-driven, non-blocking, controller server built around .NET's native System.Net.HttpListener class.
+
+== Design Philosophy
+nServer is a controller server (the C in MVC), intentionally ignoring models and views.  nServer was not conceived nor built to play the role of an application's web server.  Rather, nServer focuses on endpoints, and more specifically, web accessible endpoints that are simple to construct and deploy.  nServer is capable of acting as a stand-alone controller server but also shines as a platform on which to build lightweight, customized servers.
+
+== Installation & Configuration
+Once you have the source code, other than building the project, there is no installation.  If you want to run the nServer as a stand alone server, be sure the project's properties are set to compile to a Console Application.  If you want to use it as a platform, compile it as a class library.
+
+Once compiled, configuration is straightforward.  nServer has a single configuration file with base server settings as well as a placeholder for any custom settings you wish to incorporate.  Base server settings include:
+
+* Version (server version)
+* Contact (server point of contact)
+* Name (server name)
+* Host (server host)
+* Port (server port)
+* Smtphost (found in the email settings section)
+
+== Controllers
+Controllers in nServer are classes that extend Server.Controllers.ApplicationController and adhere to a standard naming convention, specifically, [NameOfController]Controller.  Extending ApplicationController does three things. First, it enables nServer to identify and register your controller.  Second, it gives you a free controller action, namely 'ping', to ensure everything is wired up correctly.  Third, it gives you some tooling to easily work with inbound requests.  The name of the controller is crucial as nServer routes requests based on the URL.  For example, a request to http://localhost:8081/foo/bar will invoke Bar on FooController.  Outside of extending ApplicationController and adhereing to the naming scheme, there are no restrictions: controllers can live anywhere in your project; controllers can be static; controllers be contain handles to any other code in your application.
+
+nServer comes with one controller that is reserved for the server, namely ServerController.  Currently it has no actions of its own though new ones are planned for future revisions.
+
+namespace Server.Controllers
+{
+    /// <summary>
+    /// Base server controller.  Primarily used when running the server as-is
+    /// (e.g. as an executable) versus wrapping it to cater to a given client's
+    /// needs (e.g. as a DLL).
+    /// </summary>
+    class ServerController : ApplicationController
+    {
+    }
+}
+
+== Actions
+Actions in nServer are methods on controllers that adhere to a standard signature: public Response ActionName() {...}.  An action can perform any task whatsoever.  They are not intrinsically tied to any view or model.  All actions ultimately respond to a request with a Server.Controllers.Response object.  The Response object contains basic metadata: http status code, http status description, and message (http response).  The name of the action is crucial as nServer routes requests based on the URL.  For example, a request to http://localhost:8081/foo/bar will invoke the Bar action on FooController.  Inside your actions, you'll often leverage the Parameters property on the base ApplicationController class to access arguments passed along with the request.  Currently nServer actions can only accept query string arguments.
+
+In addition to actions, nServer also provides a hook to associate an exception handler to an action.  To make this association, the handler must adhere to a standard signature: public Response ActionName_Handler(Exception ex) {...}.  While this can be done inline, this capability keeps the code clean, focused, and, perhaps more important, allows for possible reuse of exception handling logic.  In terms of execution, when an exception occurs in an action and is not caught and dealt with there, the handler, if one exists, will take over.
+
+== Decorators
+Decorators are method scoped attributes you associate to actions.  The fire before a request enters the action, similar to Rail's before_filter concept.  nServer comes with two but adding your own custom decorators is a breeze and encouraged.  The two aforementioned decorators are ConfirmParameters and OnError.
+
+ConfirmParameters simply confirms the set of parameters an action expects.
+
+[ConfirmParameters("foo,bar")]
+public Response MyAction() {...}
+
+OnError is a bit more intricate.  Generally speaking, OnError instructs the server what to do in the event of an unhandled exception.  The default behavior is to log the exception and continuing processing requests.  However, you can alternatively or additionaly (you can decorate actions with multiple OnError decorators) have the server notify an individual via email and, in extreme cases, lock the server down such that requests are no longer accepted. Other examples of decorators in use outside nServer are decorators that enforce security and decorators that initilize controller dependencies.  Keep in mind, since you can decorate your actions with multiple OnError decorators, nServer uses the worst case condition.  In other words, if any one OnError decorator configures your server to block clients, regardless of what every other OnError decorator specifies, nServer will prevent any future requests in.
+
+[OnError(OnErrorAttribute.ExceptionEndPoint.Log, OnErrorAttribute.ServerBehavior.RemainActive)]
+[OnError(OnErrorAttribute.ExceptionEndPoint.Email, OnErrorAttribute.ServerBehavior.BlockClients, Recipients = "foo@bar.com")]
+public Response MyAction() {...}
+        
+== Dependencies
+nServer strives to have as few dependencies as possible.  The goal with minimizing dependencies is to let the developer pick and choose how they want their server to behave and what they require of it.  If not for the need to be able to stand nServer on its own as a functional server, it would require nothing. However, that not being an option, it does depend on and only on nLog (http://nlog-project.org/).
