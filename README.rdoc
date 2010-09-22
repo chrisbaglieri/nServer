@@ -25,15 +25,6 @@ Controllers in nServer are classes that extend Server.Controllers.ApplicationCon
 
 nServer comes with one controller that is reserved for the server, namely ServerController.  Currently it has no actions of its own though new ones are planned for future revisions.
 
-/// <summary><br />
-/// Base server controller.  Primarily used when running the server as-is<br />
-/// (e.g. as an executable) versus wrapping it to cater to a given client's<br />
-/// needs (e.g. as a DLL).<br />
-/// </summary><br />
-class ServerController : ApplicationController<br />
-{<br />
-}
-
 == Actions
 
 Actions in nServer are methods on controllers that adhere to a standard signature: <em>public Response ActionName() {...}</em>.  An action can perform any task whatsoever.  They are not intrinsically tied to any view or model.  All actions ultimately respond to a request with a Server.Controllers.Response object.  The Response object contains basic metadata: http status code, http status description, and message (http response).  The name of the action is crucial as nServer routes requests based on the URL.  For example, a request to http://localhost:8081/foo/bar will invoke the Bar action on FooController.  Inside your actions, you'll often leverage the Parameters property on the base ApplicationController class to access arguments passed along with the request.  Currently nServer actions can only accept query string arguments.
@@ -46,9 +37,11 @@ Decorators are method scoped attributes you associate to actions.  The fire befo
 
 ConfirmParameters simply confirms the set of parameters an action expects.
 
+{
 [ConfirmParameters("foo,bar")]
 public Response MyAction() 
 {
+}
 }
 
 OnError is a bit more intricate.  Generally speaking, OnError instructs the server what to do in the event of an unhandled exception.  The default behavior is to log the exception and continuing processing requests.  However, you can alternatively or additionaly (you can decorate actions with multiple OnError decorators) have the server notify an individual via email and, in extreme cases, lock the server down such that requests are no longer accepted. Other examples of decorators in use outside nServer are decorators that enforce security and decorators that initilize controller dependencies.  Keep in mind, since you can decorate your actions with multiple OnError decorators, nServer uses the worst case condition.  In other words, if any one OnError decorator configures your server to block clients, regardless of what every other OnError decorator specifies, nServer will prevent any future requests in.
