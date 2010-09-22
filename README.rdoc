@@ -33,24 +33,11 @@ In addition to actions, nServer also provides a hook to associate an exception h
 
 == Decorators
 
-Decorators are method scoped attributes you associate to actions.  The fire before a request enters the action, similar to Rail's before_filter concept.  nServer comes with two but adding your own custom decorators is a breeze and encouraged.  The two aforementioned decorators are ConfirmParameters and OnError.
+Decorators are method scoped attributes you associate to actions.  The fire before a request enters the action, similar to Rail's before_filter concept.  nServer comes with two but adding your own custom decorators is a breeze and encouraged.  The two aforementioned decorators are <b>ConfirmParameters</b> and <b>OnError</b>.
 
-ConfirmParameters simply confirms the set of parameters an action expects.
+ConfirmParameters simply confirms the set of parameters an action expects.  OnError is a bit more intricate.  Generally speaking, OnError instructs the server what to do in the event of an unhandled exception.  The default behavior is to log the exception and continuing processing requests.  However, you can alternatively or additionaly (you can decorate actions with multiple OnError decorators) have the server notify an individual via email and, in extreme cases, lock the server down such that requests are no longer accepted.
 
-{
-[ConfirmParameters("foo,bar")]
-public Response MyAction() 
-{
-}
-}
-
-OnError is a bit more intricate.  Generally speaking, OnError instructs the server what to do in the event of an unhandled exception.  The default behavior is to log the exception and continuing processing requests.  However, you can alternatively or additionaly (you can decorate actions with multiple OnError decorators) have the server notify an individual via email and, in extreme cases, lock the server down such that requests are no longer accepted. Other examples of decorators in use outside nServer are decorators that enforce security and decorators that initilize controller dependencies.  Keep in mind, since you can decorate your actions with multiple OnError decorators, nServer uses the worst case condition.  In other words, if any one OnError decorator configures your server to block clients, regardless of what every other OnError decorator specifies, nServer will prevent any future requests in.
-
-[OnError(OnErrorAttribute.ExceptionEndPoint.Log, OnErrorAttribute.ServerBehavior.RemainActive)]
-[OnError(OnErrorAttribute.ExceptionEndPoint.Email, OnErrorAttribute.ServerBehavior.BlockClients, Recipients = "foo@bar.com")]
-public Response MyAction() 
-{
-}
+Adding new decorators is very straightforward.  Adding a .NET attribute which extends Server.Controllers.Attributes.CustomAttribute is all that's required. 
 
 == Dependencies
 
