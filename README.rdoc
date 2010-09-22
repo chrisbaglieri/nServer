@@ -36,9 +36,9 @@ class ServerController : ApplicationController
 
 == Actions
 
-Actions in nServer are methods on controllers that adhere to a standard signature: public Response ActionName() {...}.  An action can perform any task whatsoever.  They are not intrinsically tied to any view or model.  All actions ultimately respond to a request with a Server.Controllers.Response object.  The Response object contains basic metadata: http status code, http status description, and message (http response).  The name of the action is crucial as nServer routes requests based on the URL.  For example, a request to http://localhost:8081/foo/bar will invoke the Bar action on FooController.  Inside your actions, you'll often leverage the Parameters property on the base ApplicationController class to access arguments passed along with the request.  Currently nServer actions can only accept query string arguments.
+Actions in nServer are methods on controllers that adhere to a standard signature: <em>public Response ActionName() {...}</em>.  An action can perform any task whatsoever.  They are not intrinsically tied to any view or model.  All actions ultimately respond to a request with a Server.Controllers.Response object.  The Response object contains basic metadata: http status code, http status description, and message (http response).  The name of the action is crucial as nServer routes requests based on the URL.  For example, a request to http://localhost:8081/foo/bar will invoke the Bar action on FooController.  Inside your actions, you'll often leverage the Parameters property on the base ApplicationController class to access arguments passed along with the request.  Currently nServer actions can only accept query string arguments.
 
-In addition to actions, nServer also provides a hook to associate an exception handler to an action.  To make this association, the handler must adhere to a standard signature: public Response ActionName_Handler(Exception ex) {...}.  While this can be done inline, this capability keeps the code clean, focused, and, perhaps more important, allows for possible reuse of exception handling logic.  In terms of execution, when an exception occurs in an action and is not caught and dealt with there, the handler, if one exists, will take over.
+In addition to actions, nServer also provides a hook to associate an exception handler to an action.  To make this association, the handler must adhere to a standard signature: <em>public Response ActionName_Handler(Exception ex) {...}</em>.  While this can be done inline, this capability keeps the code clean, focused, and, perhaps more important, allows for possible reuse of exception handling logic.  In terms of execution, when an exception occurs in an action and is not caught and dealt with there, the handler, if one exists, will take over.
 
 == Decorators
 
@@ -58,7 +58,7 @@ OnError is a bit more intricate.  Generally speaking, OnError instructs the serv
 public Response MyAction() 
 {
 }
-        
+
 == Dependencies
 
 nServer strives to have as few dependencies as possible.  The goal with minimizing dependencies is to let the developer pick and choose how they want their server to behave and what they require of it.  If not for the need to be able to stand nServer on its own as a functional server, it would require nothing. However, that not being an option, it does depend on and only on nLog (http://nlog-project.org/).
