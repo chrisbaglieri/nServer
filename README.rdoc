@@ -25,6 +25,7 @@ Controllers in nServer are classes that extend Server.Controllers.ApplicationCon
 
 nServer comes with one controller that is reserved for the server, namely ServerController.  Currently it has no actions of its own though new ones are planned for future revisions.
 
+<tt>
 /// <summary>
 /// Base server controller.  Primarily used when running the server as-is
 /// (e.g. as an executable) versus wrapping it to cater to a given client's
@@ -33,6 +34,7 @@ nServer comes with one controller that is reserved for the server, namely Server
 class ServerController : ApplicationController
 {
 }
+</tt>
 
 == Actions
 
